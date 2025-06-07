@@ -1,0 +1,84 @@
+/* Basic Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+    line-height: 1.6;
+    background-color: #f5f5f7;
+    color: #1d1d1f;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 20px;
+}
+
+header {
+    width: 100%;
+    max-width: 800px;
+    padding: 20px;
+    text-align: center;
+    border-bottom: 1px solid #d2d2d7;
+    margin-bottom: 20px;
+}
+
+header h1 {
+    font-size: 2em;
+    font-weight: 600;
+    color: #1d1d1f;
+}
+
+#tab-navigation {
+    width: 100%;
+    max-width: 800px;
+    display: flex;
+    justify-content: center; /* Center tabs */
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    padding: 8px;
+    margin-bottom: 20px;
+}
+
+/* Tab button styling will be added later when JS creates them */
+.tab-button {
+    padding: 10px 20px;
+    cursor: pointer;
+    border: none;
+    background-color: transparent;
+    font-size: 1em;
+    color: #007aff; /* Apple's blue */
+    border-radius: 8px; /* Rounded corners for individual tabs */
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.tab-button.active {
+    background-color: #007aff;
+    color: #ffffff;
+    font-weight: 500;
+}
+
+.tab-button:hover:not(.active) {
+    background-color: rgba(0, 122, 255, 0.1); /* Lighter blue on hover */
+}
+
+#tab-content {
+    width: 100%;
+    max-width: 800px;
+    background-color: #ffffff;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    min-height: 300px; /* Give some initial height */
+}
+
+#tab-content > div { /* Direct div children are tab panels */
+    display: none; /* Hide all tab panels by default */
+}
+
+#tab-content > div.active {
+    display: block; /* Show active tab panel */
+}
