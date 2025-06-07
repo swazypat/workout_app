@@ -110,3 +110,71 @@ header h1 {
 #exercise-list-container li p strong {
     color: #1d1d1f; /* Standard text color for strong elements */
 }
+
+/* Styling for the Log Workout Tab */
+#log-workout-content .form-group {
+    margin-bottom: 15px;
+}
+
+#log-workout-content .form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 500;
+    color: #333;
+}
+
+#log-workout-content .form-group input[type="text"],
+#log-workout-content .form-group input[type="number"],
+#log-workout-content .form-group select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 1em;
+}
+
+#log-workout-content button#save-log-btn {
+    background-color: #28a745; /* A green color for save */
+    color: white;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 6px;
+    font-size: 1em;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+#log-workout-content button#save-log-btn:hover {
+    background-color: #218838; /* Darker green on hover */
+}
+
+#saved-logs-container {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+}
+
+#saved-logs-container h3 {
+    margin-bottom: 15px;
+    color: #1d1d1f;
+}
+
+#saved-logs-list {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+#saved-logs-list li {
+    background-color: #f9f9f9;
+    padding: 12px;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    margin-bottom: 10px;
+    font-size: 0.95em;
+    line-height: 1.6;
+}
+
+#saved-logs-list li strong {
+    color: #007aff; /* Apple blue for exercise name */
+    font-size: 1.1em;
+}

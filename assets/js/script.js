@@ -98,6 +98,86 @@ function displayExercises() {
     listContainer.appendChild(ul);
 }
 
+function populateExerciseDropdown() {
+    // Ensure this function is called when the 'Log Workout' tab is active and its DOM is ready.
+    const logWorkoutPanel = document.getElementById('log-workout-content'); // Panel ID for 'log-workout' tab
+    if (!logWorkoutPanel) return; // Tab panel not active/rendered
+
+    const selectElement = logWorkoutPanel.querySelector('#exercise-name-select');
+    if (!selectElement) {
+        console.error('Exercise name select element not found in Log Workout tab.');
+        return;
+    }
+
+    // Clear existing options (except the default "-- Select --")
+    while (selectElement.options.length > 1) {
+        selectElement.remove(1);
+    }
+
+    sampleExercises.forEach(exercise => {
+        const option = document.createElement('option');
+        option.value = exercise.id; // Store exercise ID as value
+        option.textContent = exercise.name;
+        selectElement.appendChild(option);
+    });
+}
+
+const WORKOUT_LOGS_KEY = 'workoutLogs'; // Define a constant for the localStorage key
+
+function saveWorkoutLog(logEntry) {
+    let logs = loadData(WORKOUT_LOGS_KEY);
+    if (!logs || !Array.isArray(logs)) {
+        logs = []; // Initialize as an empty array if no logs or not an array
+    }
+    logs.push(logEntry);
+    saveData(WORKOUT_LOGS_KEY, logs);
+    console.log('Workout log saved:', logEntry);
+    // Optionally, trigger display of saved logs here
+    // displaySavedLogs(); // We'll call this separately after saving for now
+}
+
+function displaySavedLogs() {
+    const logWorkoutPanel = document.getElementById('log-workout-content');
+    if (!logWorkoutPanel) {
+        // console.log('Log Workout panel not active/rendered for displaying logs.');
+        return;
+    }
+
+    const logsListElement = logWorkoutPanel.querySelector('#saved-logs-list');
+    if (!logsListElement) {
+        console.error('Saved logs list element not found in Log Workout tab.');
+        return;
+    }
+
+    const logs = loadData(WORKOUT_LOGS_KEY);
+    logsListElement.innerHTML = ''; // Clear existing list items
+
+    if (!logs || logs.length === 0) {
+        logsListElement.innerHTML = '<li>No workout logs saved yet.</li>';
+        return;
+    }
+
+    // Display logs, newest first
+    logs.slice().reverse().forEach(log => {
+        const listItem = document.createElement('li');
+        const logDate = new Date(log.timestamp);
+        // Format date and time to be more readable
+        const formattedTimestamp = `${logDate.toLocaleDateString()} ${logDate.toLocaleTimeString()}`;
+
+        listItem.innerHTML = `
+            <strong>${log.exerciseName}</strong> - ${formattedTimestamp}<br>
+            Sets: ${log.sets}, Reps: ${log.reps}, Weight: ${log.weight}
+        `;
+        // Add some basic styling or class for styling via CSS later
+        listItem.style.padding = '10px';
+        listItem.style.borderBottom = '1px solid #eee';
+        if (logsListElement.firstChild) { // Add a small top border if not the first
+             // listItem.style.borderTop = '1px solid #eee';
+        }
+        logsListElement.appendChild(listItem);
+    });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     const tabNavigation = document.getElementById('tab-navigation');
     const tabContent = document.getElementById('tab-content');
@@ -112,6 +192,41 @@ document.addEventListener('DOMContentLoaded', () => {
             id: 'exercises',
             name: 'Exercises',
             content: '<h2>Exercise Library</h2><p>Browse through the available exercises below.</p><div id="exercise-list-container" style="margin-top: 15px;"></div>'
+        },
+        {
+            id: 'log-workout',
+            name: 'Log Workout',
+            content: `
+                <h2>Log Your Workout</h2>
+                <form id="log-workout-form">
+                    <div class="form-group">
+                        <label for="exercise-name-select">Exercise Name:</label>
+                        <select id="exercise-name-select" name="exercise-name-select" required>
+                            <option value="">-- Select an Exercise --</option>
+                            <!-- Options will be populated by JavaScript -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="exercise-sets">Sets:</label>
+                        <input type="number" id="exercise-sets" name="exercise-sets" min="1" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="exercise-reps">Reps (per set):</label>
+                        <input type="number" id="exercise-reps" name="exercise-reps" min="1" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="exercise-weight">Weight (kg/lbs):</label>
+                        <input type="number" id="exercise-weight" name="exercise-weight" min="0" step="0.1">
+                    </div>
+                    <button type="submit" id="save-log-btn">Save Log</button>
+                </form>
+                <div id="saved-logs-container" style="margin-top: 30px;">
+                    <h3>Previously Saved Logs:</h3>
+                    <ul id="saved-logs-list">
+                        <!-- Logs will be displayed here -->
+                    </ul>
+                </div>
+            `
         },
         { id: 'profile', name: 'Profile', content: '<div>\n            <h2>User Profile</h2>\n            <p>This section is designated for displaying and managing user-specific information. In a full application, this could include:</p>\n            <ul>\n                <li>Username and contact details.</li>\n                <li>Profile picture and bio.</li>\n                <li>Account preferences and activity logs.</li>\n            </ul>\n            <p>For now, it\'s a placeholder to illustrate the tab\'s purpose. Data for this section would typically be fetched from the database.</p>\n            <section aria-labelledby="profile-example-heading" style="margin-top: 20px; padding: 15px; background-color: #e9e9eb; border-radius: 8px;">\n                <h3 id="profile-example-heading">Example Profile Data (Conceptual):</h3>\n                <p><strong>Name:</strong> Alex Appleby</p>\n                <p><strong>Email:</strong> alex.appleby@example.com</p>\n                <p><strong>Joined:</strong> January 1, 2024</p>\n            </section>\n        </div>' },
         { id: 'settings', name: 'Settings', content: '<div>\n            <h2>Application Settings</h2>\n            <p>Here, you would typically find options to customize your application experience. This might include:</p>\n            <ul>\n                <li><strong>Appearance:</strong> Theme selection (light/dark mode), font size adjustments.</li>\n                <li><strong>Notifications:</strong> Preferences for email or in-app alerts.</li>\n                <li><strong>Data Management:</strong> Options to export or import data, or clear local cache.</li>\n                <li><strong>Account:</strong> Password changes, privacy settings, or account deletion.</li>\n            </ul>\n            <p>Currently, these are illustrative points. The \'Data\' tab already provides a basic example of clearing locally stored data.</p>\n            <section aria-labelledby="example-settings-heading" style="margin-top: 20px;">\n                <h3 id="example-settings-heading">Example Setting:</h3>\n                <label for="theme-select" style="margin-right: 5px;">Theme:</label>\n                <select id="theme-select" style="padding: 5px; border-radius: 4px; border: 1px solid #d2d2d7;">\n                    <option value="light">Light (Default)</option>\n                    <option value="dark" disabled>Dark (Coming Soon)</option>\n                </select>\n            </section>\n        </div>' },
@@ -129,8 +244,13 @@ document.addEventListener('DOMContentLoaded', () => {
             const isActive = contentPanel.id === tabId + '-content';
             contentPanel.classList.toggle('active', isActive);
 
-            if (isActive && tabId === 'exercises') { // If 'Exercises' tab is now active
-                displayExercises(); // Call function to populate it
+            if (isActive) {
+                if (tabId === 'exercises') {
+                    displayExercises();
+                } else if (tabId === 'log-workout') {
+                    populateExerciseDropdown();
+                    displaySavedLogs(); // Add this call
+                }
             }
         });
     }
@@ -185,12 +305,55 @@ document.addEventListener('DOMContentLoaded', () => {
     // Check if the initially active tab is 'exercises' and populate if so.
     // Note: Our default active tab is 'home'. This is for robustness if that changes.
     const initiallyActiveButton = tabNavigation.querySelector('.tab-button.active');
-    if (initiallyActiveButton && initiallyActiveButton.dataset.tabId === 'exercises') {
-        displayExercises();
+    if (initiallyActiveButton) {
+        if (initiallyActiveButton.dataset.tabId === 'exercises') {
+            displayExercises();
+        } else if (initiallyActiveButton.dataset.tabId === 'log-workout') {
+            populateExerciseDropdown();
+            displaySavedLogs(); // Add this call
+        }
+    }
+
+    // Using Event Delegation for the Log Workout form submission:
+    const tabContentElement = document.getElementById('tab-content');
+    if (tabContentElement) {
+        tabContentElement.addEventListener('submit', function(event) {
+            if (event.target.id === 'log-workout-form') {
+                event.preventDefault(); // Prevent default form submission
+
+                const exerciseSelect = document.getElementById('exercise-name-select'); // ID of the select element
+                const setsInput = document.getElementById('exercise-sets');
+                const repsInput = document.getElementById('exercise-reps');
+                const weightInput = document.getElementById('exercise-weight');
+
+                const logEntry = {
+                    exerciseId: exerciseSelect.value, // Store the ID
+                    exerciseName: exerciseSelect.options[exerciseSelect.selectedIndex].text, // Store name for easier display
+                    sets: parseInt(setsInput.value),
+                    reps: parseInt(repsInput.value),
+                    weight: parseFloat(weightInput.value) || 0, // Default to 0 if empty
+                    timestamp: new Date().toISOString()
+                };
+
+                if (!logEntry.exerciseId) {
+                    alert('Please select an exercise.');
+                    return;
+                }
+
+                saveWorkoutLog(logEntry);
+
+                // Alert user or give feedback
+                alert('Workout log saved!'); // Simple feedback
+                displaySavedLogs(); // Add this call to refresh the list
+                event.target.reset(); // Resets the form
+                // Repopulate dropdown's default selection (if needed, but reset might handle it)
+                // exerciseSelect.value = "";
+            }
+        });
     }
 
     // Event listeners for the Data tab
-    const dataTabContent = document.getElementById('data-content');
+    const dataTabContent = document.getElementById('data-content'); // Corrected to use tabContentElement
     if (dataTabContent) { // Check if the data tab content exists
         const dataInput = dataTabContent.querySelector('#data-input');
         const saveDataBtn = dataTabContent.querySelector('#save-data-btn');
