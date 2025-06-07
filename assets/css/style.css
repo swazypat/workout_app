@@ -297,3 +297,55 @@ header h1 {
     padding: 15px; // Adjust padding if border is added
 }
 */
+
+/* Styling for Exercise Filter Controls */
+#exercises-content #exercise-filters {
+    /* background-color: #f0f0f0; */ /* Already set via inline style, can be moved here */
+    /* padding: 15px; */ /* Already set via inline style, can be moved here */
+    /* border-radius: 8px; */ /* Already set via inline style, can be moved here */
+    /* margin-bottom: 20px; */ /* Already set via inline style, can be moved here */
+    display: flex;
+    flex-wrap: wrap; /* Allow items to wrap on smaller screens */
+    gap: 15px; /* Space between filter groups */
+    align-items: flex-end; /* Align items nicely if they have different heights */
+}
+
+#exercises-content .filter-group {
+    display: flex;
+    flex-direction: column; /* Stack label on top of select */
+    flex-grow: 1; /* Allow groups to grow */
+    min-width: 180px; /* Minimum width for each filter group */
+}
+
+#exercises-content .filter-group label {
+    margin-bottom: 5px;
+    font-weight: 500;
+    font-size: 0.9em;
+    color: #333;
+}
+
+#exercises-content .filter-group select {
+    width: 100%; /* Make select take full width of its group */
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 0.95em;
+    background-color: #fff; /* White background for select */
+}
+
+#exercises-content button#reset-filters-btn {
+    padding: 10px 15px;
+    font-size: 0.95em;
+    background-color: #6c757d; /* Secondary gray color */
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    /* margin-top: 10px; */ /* Already set via inline style, can be removed if flex alignment is good */
+    height: fit-content; /* Align with bottom of selects if labels make groups taller */
+}
+
+#exercises-content button#reset-filters-btn:hover {
+    background-color: #5a6268;
+}

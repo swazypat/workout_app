@@ -189,22 +189,45 @@ const standardEquipmentList = [
 function displayExercises() {
     // Check if container is found inside the exercises tab content specifically
     // This is important because the element might not be in the main DOM when tabs are hidden.
-    const exercisesTabPanel = document.getElementById('exercises-content'); // This is the ID of the tab panel for 'exercises'
-    let listContainer = null;
+    const exercisesPanel = document.getElementById('exercises-content');
+    if (!exercisesPanel) {
+        // console.log('Exercises panel not found for display.');
+        return;
+    }
+    const listContainer = exercisesPanel.querySelector('#exercise-list-container');
     if (exercisesTabPanel) {
         listContainer = exercisesTabPanel.querySelector('#exercise-list-container');
     }
 
     if (!listContainer) {
-        console.log('Exercise list container not found in the Exercises tab panel. It might not be active yet.');
-        // We will call this function when the tab is made active.
+        // console.error('Exercise list container not found in Exercises tab.');
         return;
     }
 
-    listContainer.innerHTML = ''; // Clear any existing content
+    // Get current filter values
+    const selectedExperience = exercisesPanel.querySelector('#filter-experience').value;
+    const selectedCategory = exercisesPanel.querySelector('#filter-categoryPPL').value;
+    const selectedEquipment = exercisesPanel.querySelector('#filter-equipment').value;
+    const selectedMuscleGroup = exercisesPanel.querySelector('#filter-muscleGroup').value;
 
-    if (sampleExercises.length === 0) {
-        listContainer.innerHTML = '<p>No exercises found.</p>';
+    // Filter sampleExercises
+    let filteredExercises = sampleExercises.filter(exercise => {
+        const matchesExperience = !selectedExperience || exercise.experienceLevel === selectedExperience;
+        const matchesCategory = !selectedCategory || exercise.categoryPPL === selectedCategory;
+        const matchesEquipment = !selectedEquipment || exercise.equipmentNeeded === selectedEquipment;
+
+        // Muscle group check: if a specific muscle group is selected,
+        // check if the exercise's muscleGroup string (which can be "Chest, Shoulders") contains the selected one.
+        const exerciseMuscleGroups = exercise.muscleGroup.split(',').map(mg => mg.trim().toLowerCase());
+        const matchesMuscleGroup = !selectedMuscleGroup || exerciseMuscleGroups.includes(selectedMuscleGroup.toLowerCase());
+
+        return matchesExperience && matchesCategory && matchesEquipment && matchesMuscleGroup;
+    });
+
+    listContainer.innerHTML = ''; // Clear existing content
+
+    if (filteredExercises.length === 0) {
+        listContainer.innerHTML = '<p>No exercises match your current filter criteria.</p>';
         return;
     }
 
@@ -212,12 +235,12 @@ function displayExercises() {
     ul.style.listStyleType = 'none';
     ul.style.padding = '0';
 
-    sampleExercises.forEach(exercise => {
+    filteredExercises.forEach(exercise => {
         const li = document.createElement('li');
         li.style.marginBottom = '20px';
         li.style.padding = '15px';
-        li.style.border = '1px solid #ddd';
-        li.style.borderRadius = '8px';
+        li.style.border = '1px solid #ddd'; // Ensure this matches CSS or move to CSS
+        li.style.borderRadius = '8px';   // Ensure this matches CSS or move to CSS
 
         let content = `
             <h3 style="margin-top: 0; margin-bottom: 10px; color: #007aff;">${exercise.name}</h3>
@@ -595,13 +618,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (isActive) {
                 if (tabId === 'exercises') {
+                    populateFilterDropdowns(); // Call this first
                     displayExercises();
                 } else if (tabId === 'log-workout') {
                     populateExerciseDropdown();
                     displaySavedLogs();
                 } else if (tabId === 'settings') {
-                    displayEquipmentChecklist(); // Ensures checkboxes are created
-                    loadUserEquipmentAndDisplay(); // Then load and check saved ones
+                    displayEquipmentChecklist();
+                    loadUserEquipmentAndDisplay();
                 }
             }
         });
@@ -659,13 +683,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const initiallyActiveButton = tabNavigation.querySelector('.tab-button.active');
     if (initiallyActiveButton) {
         if (initiallyActiveButton.dataset.tabId === 'exercises') {
+            populateFilterDropdowns(); // Call this first
             displayExercises();
         } else if (initiallyActiveButton.dataset.tabId === 'log-workout') {
             populateExerciseDropdown();
             displaySavedLogs();
         } else if (initiallyActiveButton.dataset.tabId === 'settings') {
             displayEquipmentChecklist();
-            loadUserEquipmentAndDisplay(); // Add this call
+            loadUserEquipmentAndDisplay();
         }
     }
 
