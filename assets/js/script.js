@@ -447,6 +447,110 @@ function deleteWorkoutLog(logTimestamp) {
     displaySavedLogs(); // Refresh the list
 }
 
+function calculateAllPBs() {
+    const logs = loadData(WORKOUT_LOGS_KEY);
+    if (!logs || !Array.isArray(logs) || logs.length === 0) {
+        return {}; // Return an empty object if no logs
+    }
+
+    const pbs = {}; // Object to store PBs, keyed by exerciseId
+
+    // Group logs by exerciseId
+    const logsByExercise = logs.reduce((acc, log) => {
+        if (!log.exerciseId || typeof log.weight === 'undefined') return acc; // Skip logs without exerciseId or weight
+
+        acc[log.exerciseId] = acc[log.exerciseId] || [];
+        acc[log.exerciseId].push(log);
+        return acc;
+    }, {});
+
+    // Calculate PB for each exercise
+    for (const exerciseId in logsByExercise) {
+        const exerciseLogs = logsByExercise[exerciseId];
+        if (exerciseLogs.length === 0) continue;
+
+        // Sort logs to find the best performance based on criteria:
+        // 1. Highest weight
+        // 2. Highest reps (if weight is tied)
+        // 3. Most recent (if weight and reps are tied)
+        exerciseLogs.sort((a, b) => {
+            if (b.weight !== a.weight) {
+                return b.weight - a.weight; // Higher weight first
+            }
+            if (b.reps !== a.reps) {
+                return b.reps - a.reps; // Higher reps first (for same weight)
+            }
+            // Compare timestamps: newer first
+            return new Date(b.timestamp) - new Date(a.timestamp);
+        });
+
+        const pbLog = exerciseLogs[0]; // The first log after sorting is the PB
+
+        pbs[exerciseId] = {
+            exerciseId: pbLog.exerciseId,
+            exerciseName: pbLog.exerciseName, // Name is stored in the log
+            pbWeight: pbLog.weight,
+            reps: pbLog.reps,
+            sets: pbLog.sets, // Sets from that particular PB log entry
+            timestamp: pbLog.timestamp // Timestamp of when this PB was achieved
+        };
+    }
+
+    return pbs;
+}
+
+function displayPBs() {
+    const progressPanel = document.getElementById('progress-content'); // Panel ID for 'progress' tab
+    if (!progressPanel) {
+        // console.log('Progress panel not active/rendered for displaying PBs.');
+        return;
+    }
+
+    const pbContainer = progressPanel.querySelector('#pb-display-container');
+    if (!pbContainer) {
+        console.error('PB display container not found in Progress tab.');
+        return;
+    }
+
+    const pbs = calculateAllPBs(); // Get the calculated PBs
+    pbContainer.innerHTML = ''; // Clear previous content (e.g., "Calculating PBs..." message)
+
+    if (Object.keys(pbs).length === 0) {
+        pbContainer.innerHTML = '<p>No Personal Bests recorded yet. Keep logging your workouts with weights!</p>';
+        return;
+    }
+
+    const ul = document.createElement('ul');
+    ul.style.listStyleType = 'none';
+    ul.style.padding = '0';
+
+    // Sort PBs by exercise name for consistent display order
+    const sortedPbExerciseIds = Object.keys(pbs).sort((a, b) => {
+        return pbs[a].exerciseName.localeCompare(pbs[b].exerciseName);
+    });
+
+    sortedPbExerciseIds.forEach(exerciseId => {
+        const pb = pbs[exerciseId];
+        const listItem = document.createElement('li');
+        // Add a class for easier CSS targeting
+        listItem.classList.add('pb-item');
+
+        const pbDate = new Date(pb.timestamp);
+        const formattedDate = pbDate.toLocaleDateString();
+
+        listItem.innerHTML = `
+            <h4>${pb.exerciseName}</h4>
+            <p><strong>Max Weight:</strong> ${pb.pbWeight} (kg/lbs assumed)</p>
+            <p><strong>Reps:</strong> ${pb.reps} (at this weight)</p>
+            <p><strong>Sets:</strong> ${pb.sets} (in that workout session)</p>
+            <p><em>Achieved on: ${formattedDate}</em></p>
+        `;
+        ul.appendChild(listItem);
+    });
+
+    pbContainer.appendChild(ul);
+}
+
 function displaySavedLogs() {
     const logWorkoutPanel = document.getElementById('log-workout-content');
     if (!logWorkoutPanel) {
@@ -565,6 +669,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
             `
         },
+        {
+            id: 'progress',
+            name: 'Progress',
+            content: `
+                <div id="progress-tab-content">
+                    <h2>Your Personal Bests</h2>
+                    <p>Here are your current personal bests (heaviest weight lifted) for exercises you've logged with weight.</p>
+                    <div id="pb-display-container" style="margin-top: 20px;">
+                        <p>Calculating PBs...</p>
+                    </div>
+                </div>
+            `
+        },
         { id: 'profile', name: 'Profile', content: '<div>\n            <h2>User Profile</h2>\n            <p>This section is designated for displaying and managing user-specific information. In a full application, this could include:</p>\n            <ul>\n                <li>Username and contact details.</li>\n                <li>Profile picture and bio.</li>\n                <li>Account preferences and activity logs.</li>\n            </ul>\n            <p>For now, it\'s a placeholder to illustrate the tab\'s purpose. Data for this section would typically be fetched from the database.</p>\n            <section aria-labelledby="profile-example-heading" style="margin-top: 20px; padding: 15px; background-color: #e9e9eb; border-radius: 8px;">\n                <h3 id="profile-example-heading">Example Profile Data (Conceptual):</h3>\n                <p><strong>Name:</strong> Alex Appleby</p>\n                <p><strong>Email:</strong> alex.appleby@example.com</p>\n                <p><strong>Joined:</strong> January 1, 2024</p>\n            </section>\n        </div>' },
         {
             id: 'settings',
@@ -626,6 +743,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 } else if (tabId === 'settings') {
                     displayEquipmentChecklist();
                     loadUserEquipmentAndDisplay();
+                } else if (tabId === 'progress') { // Add this condition
+                    displayPBs();
                 }
             }
         });
@@ -691,6 +810,8 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if (initiallyActiveButton.dataset.tabId === 'settings') {
             displayEquipmentChecklist();
             loadUserEquipmentAndDisplay();
+        } else if (initiallyActiveButton.dataset.tabId === 'progress') { // Add this
+            displayPBs();
         }
     }
 
