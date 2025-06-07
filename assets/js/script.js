@@ -3,9 +3,11 @@ const sampleExercises = [
     {
         id: 'ex001',
         name: 'Push-up',
-        type: 'Strength',
-        muscleGroup: 'Chest, Shoulders, Triceps',
+        type: 'Strength', // General classification
+        muscleGroup: 'Chest, Shoulders, Triceps', // Specific muscles
         equipmentNeeded: 'None',
+        experienceLevel: 'Beginner', // New property
+        categoryPPL: 'Push', // New property (Push/Pull/Legs or other broader category)
         instructions: 'Start in a plank position with hands slightly wider than shoulders. Lower your body until your chest nearly touches the floor, then push back up to the starting position. Keep your body straight throughout the movement.'
     },
     {
@@ -14,6 +16,8 @@ const sampleExercises = [
         type: 'Strength',
         muscleGroup: 'Legs, Glutes',
         equipmentNeeded: 'None (or Barbell/Dumbbells for variation)',
+        experienceLevel: 'Beginner',
+        categoryPPL: 'Legs',
         instructions: 'Stand with feet shoulder-width apart. Lower your hips as if sitting back in a chair, keeping your chest up and back straight. Go as low as comfortable, then push back up through your heels.'
     },
     {
@@ -22,6 +26,8 @@ const sampleExercises = [
         type: 'Strength',
         muscleGroup: 'Chest, Shoulders, Triceps',
         equipmentNeeded: 'Dumbbells, Bench',
+        experienceLevel: 'Beginner',
+        categoryPPL: 'Push',
         instructions: 'Lie on a bench with a dumbbell in each hand at chest level. Push the dumbbells up until your arms are fully extended, then slowly lower them back to the starting position.'
     },
     {
@@ -30,6 +36,8 @@ const sampleExercises = [
         type: 'Core',
         muscleGroup: 'Abs, Back',
         equipmentNeeded: 'None',
+        experienceLevel: 'Beginner',
+        categoryPPL: 'Core',
         instructions: 'Hold a push-up position, but rest your weight on your forearms instead of your hands. Keep your body in a straight line from head to heels. Hold for a designated time.'
     },
     {
@@ -38,6 +46,8 @@ const sampleExercises = [
         type: 'Cardio',
         muscleGroup: 'Full Body',
         equipmentNeeded: 'None',
+        experienceLevel: 'Beginner',
+        categoryPPL: 'Cardio',
         instructions: 'Stand with feet together and arms at your sides. Jump to a position with legs spread wide and arms raised overhead. Return to the starting position. Repeat.'
     },
     {
@@ -46,7 +56,119 @@ const sampleExercises = [
         type: 'Strength',
         muscleGroup: 'Biceps',
         equipmentNeeded: 'Dumbbells (or Barbell)',
+        experienceLevel: 'Beginner',
+        categoryPPL: 'Pull',
         instructions: 'Stand or sit holding dumbbells with an underhand grip. Curl the weights up towards your shoulders, keeping your elbows stationary. Slowly lower the weights back down.'
+    },
+    {
+        id: 'ex007',
+        name: 'Overhead Press (Barbell)',
+        type: 'Strength',
+        muscleGroup: 'Shoulders, Triceps',
+        equipmentNeeded: 'Barbell',
+        experienceLevel: 'Intermediate',
+        categoryPPL: 'Push',
+        instructions: 'Stand with barbell at shoulder height. Press barbell overhead until arms are fully extended. Lower with control.'
+    },
+    {
+        id: 'ex008',
+        name: 'Deadlift (Barbell)',
+        type: 'Strength',
+        muscleGroup: 'Back, Hamstrings, Glutes, Core',
+        equipmentNeeded: 'Barbell',
+        experienceLevel: 'Advanced',
+        categoryPPL: 'Pull',
+        instructions: 'Stand with mid-foot under the barbell. Bend at hips and knees to grip the bar. Keep back straight, lift chest, and drive through heels to stand up. Lower bar controllably.'
+    },
+    {
+        id: 'ex009',
+        name: 'Pull-up',
+        type: 'Strength',
+        muscleGroup: 'Back, Biceps',
+        equipmentNeeded: 'Pull-up Bar',
+        experienceLevel: 'Intermediate',
+        categoryPPL: 'Pull',
+        instructions: 'Hang from a pull-up bar with an overhand grip. Pull your body up until your chin is over the bar. Lower yourself slowly.'
+    },
+    {
+        id: 'ex010',
+        name: 'Dumbbell Row',
+        type: 'Strength',
+        muscleGroup: 'Back, Biceps',
+        equipmentNeeded: 'Dumbbell, Bench (optional)',
+        experienceLevel: 'Beginner',
+        categoryPPL: 'Pull',
+        instructions: 'Place one knee and hand on a bench, holding a dumbbell in the other hand. Pull the dumbbell towards your hip, squeezing your back muscles. Lower slowly.'
+    },
+    {
+        id: 'ex011',
+        name: 'Leg Press',
+        type: 'Strength',
+        muscleGroup: 'Quads, Hamstrings, Glutes',
+        equipmentNeeded: 'Leg Press Machine',
+        experienceLevel: 'Beginner',
+        categoryPPL: 'Legs',
+        instructions: 'Sit in a leg press machine with feet shoulder-width apart on the platform. Push the platform away until your legs are nearly extended (do not lock knees). Slowly return to start.'
+    },
+    {
+        id: 'ex012',
+        name: 'Lateral Raise (Dumbbell)',
+        type: 'Strength',
+        muscleGroup: 'Shoulders (Lateral Deltoids)',
+        equipmentNeeded: 'Dumbbells',
+        experienceLevel: 'Beginner',
+        categoryPPL: 'Push',
+        instructions: 'Stand holding dumbbells at your sides. Raise arms out to the sides until they are parallel to the floor. Lower slowly.'
+    },
+    {
+        id: 'ex013',
+        name: 'Tricep Dips (Bench)',
+        type: 'Strength',
+        muscleGroup: 'Triceps, Chest, Shoulders',
+        equipmentNeeded: 'Bench (or parallel bars)',
+        experienceLevel: 'Intermediate',
+        categoryPPL: 'Push',
+        instructions: 'Sit on edge of bench, hands gripping edge beside hips. Extend legs. Push hips off bench, lower body by bending elbows until shoulders are below elbows. Push back up.'
+    },
+    {
+        id: 'ex014',
+        name: 'Hamstring Curl (Machine)',
+        type: 'Strength',
+        muscleGroup: 'Hamstrings',
+        equipmentNeeded: 'Hamstring Curl Machine',
+        experienceLevel: 'Beginner',
+        categoryPPL: 'Legs',
+        instructions: 'Lie face down on machine, ankles under roller pad. Curl legs up towards glutes. Lower slowly.'
+    },
+    {
+        id: 'ex015',
+        name: 'Calf Raise (Standing)',
+        type: 'Strength',
+        muscleGroup: 'Calves',
+        equipmentNeeded: 'None (or weights for added resistance)',
+        experienceLevel: 'Beginner',
+        categoryPPL: 'Legs',
+        instructions: 'Stand with feet flat. Push through balls of feet to raise heels as high as possible. Hold briefly, then lower slowly.'
+    },
+    {
+        id: 'ex016',
+        name: 'Russian Twist',
+        type: 'Core',
+        muscleGroup: 'Abs, Obliques',
+        equipmentNeeded: 'None (or weight for added resistance)',
+        experienceLevel: 'Beginner',
+        categoryPPL: 'Core',
+        instructions: 'Sit on floor, lean back slightly with knees bent. Clasp hands or hold weight. Twist torso from side to side.'
+    },
+    {
+        id: 'ex017',
+        name: 'Burpee',
+        type: 'Cardio',
+        muscleGroup: 'Full Body',
+        equipmentNeeded: 'None',
+        experienceLevel: 'Intermediate',
+        categoryPPL: 'Full Body',
+        instructions: 'Start standing. Drop into a squat, hands on floor. Kick feet back to plank. Optional push-up. Jump feet forward to squat. Jump up explosively with arms overhead.'
     }
 ];
 
@@ -100,6 +222,8 @@ function displayExercises() {
         let content = `
             <h3 style="margin-top: 0; margin-bottom: 10px; color: #007aff;">${exercise.name}</h3>
             <p><strong>Type:</strong> ${exercise.type}</p>
+            <p><strong>Category:</strong> ${exercise.categoryPPL}</p>
+            <p><strong>Experience:</strong> ${exercise.experienceLevel}</p>
             <p><strong>Muscle Group:</strong> ${exercise.muscleGroup}</p>
             <p><strong>Equipment:</strong> ${exercise.equipmentNeeded}</p>
         `;

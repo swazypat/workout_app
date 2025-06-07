@@ -109,6 +109,7 @@ header h1 {
 
 #exercise-list-container li p strong {
     color: #1d1d1f; /* Standard text color for strong elements */
+    margin-right: 5px; /* Ensures a small space after every label */
 }
 
 /* Styling for the Log Workout Tab */
