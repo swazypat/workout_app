@@ -50,6 +50,20 @@ const sampleExercises = [
     }
 ];
 
+// Standard Equipment List
+const standardEquipmentList = [
+    { id: 'dumbbells', name: 'Dumbbells' },
+    { id: 'barbell', name: 'Barbell' },
+    { id: 'kettlebell', name: 'Kettlebell' },
+    { id: 'pullup_bar', name: 'Pull-up Bar' },
+    { id: 'bench_adjustable', name: 'Adjustable Bench' },
+    { id: 'resistance_bands', name: 'Resistance Bands' },
+    { id: 'yoga_mat', name: 'Yoga Mat' },
+    { id: 'jump_rope', name: 'Jump Rope' },
+    { id: 'medicine_ball', name: 'Medicine Ball' },
+    { id: 'stability_ball', name: 'Stability Ball' }
+];
+
 function displayExercises() {
     // Check if container is found inside the exercises tab content specifically
     // This is important because the element might not be in the main DOM when tabs are hidden.
@@ -98,6 +112,44 @@ function displayExercises() {
     listContainer.appendChild(ul);
 }
 
+function displayEquipmentChecklist() {
+    const settingsPanel = document.getElementById('settings-content'); // ID of the settings tab panel
+    if (!settingsPanel) return;
+
+    const container = settingsPanel.querySelector('#equipment-checkbox-container');
+    if (!container) {
+        console.error('Equipment checkbox container not found in Settings tab.');
+        return;
+    }
+
+    container.innerHTML = ''; // Clear "Loading..." message or old checkboxes
+
+    if (!standardEquipmentList || standardEquipmentList.length === 0) {
+        container.innerHTML = '<p>No standard equipment defined.</p>';
+        return;
+    }
+
+    standardEquipmentList.forEach(equipment => {
+        const div = document.createElement('div');
+        div.classList.add('equipment-item'); // For styling
+
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.id = 'equip-' + equipment.id;
+        checkbox.value = equipment.id;
+        checkbox.name = 'user_equipment';
+
+        const label = document.createElement('label');
+        label.htmlFor = 'equip-' + equipment.id;
+        label.textContent = equipment.name;
+        label.style.marginLeft = '8px';
+
+        div.appendChild(checkbox);
+        div.appendChild(label);
+        container.appendChild(div);
+    });
+}
+
 function populateExerciseDropdown() {
     // Ensure this function is called when the 'Log Workout' tab is active and its DOM is ready.
     const logWorkoutPanel = document.getElementById('log-workout-content'); // Panel ID for 'log-workout' tab
@@ -122,7 +174,54 @@ function populateExerciseDropdown() {
     });
 }
 
+const USER_EQUIPMENT_KEY = 'userEquipment';
 const WORKOUT_LOGS_KEY = 'workoutLogs'; // Define a constant for the localStorage key
+
+function loadUserEquipmentAndDisplay() {
+    const settingsPanel = document.getElementById('settings-content');
+    if (!settingsPanel) {
+        // console.log('Settings panel not active/rendered for loading equipment.');
+        return;
+    }
+
+    // Ensure checkboxes are present first by calling displayEquipmentChecklist
+    // This might be redundant if called sequentially in switchTab, but good for standalone robustness
+    // displayEquipmentChecklist(); // Potentially called right before this in switchTab
+
+    const savedEquipmentIds = loadData(USER_EQUIPMENT_KEY);
+    if (!savedEquipmentIds || !Array.isArray(savedEquipmentIds)) {
+        // console.log('No saved equipment data found or data is not an array.');
+        return; // No data to pre-select
+    }
+
+    const checkboxes = settingsPanel.querySelectorAll('#equipment-checkbox-container input[type="checkbox"]');
+    checkboxes.forEach(checkbox => {
+        if (savedEquipmentIds.includes(checkbox.value)) {
+            checkbox.checked = true;
+        } else {
+            checkbox.checked = false; // Ensure items not in the list are unchecked
+        }
+    });
+    // console.log('User equipment loaded and checkboxes updated.');
+}
+
+function saveUserEquipment(selectedEquipmentIds) {
+    saveData(USER_EQUIPMENT_KEY, selectedEquipmentIds);
+    console.log('User equipment saved:', selectedEquipmentIds);
+
+    // Display feedback message
+    const settingsPanel = document.getElementById('settings-content');
+    if (settingsPanel) {
+        const feedbackDiv = settingsPanel.querySelector('#equipment-save-feedback');
+        if (feedbackDiv) {
+            feedbackDiv.textContent = 'Equipment preferences saved successfully!';
+            // Clear message after a few seconds
+            setTimeout(() => {
+                feedbackDiv.textContent = '';
+            }, 3000);
+        }
+    }
+}
 
 function saveWorkoutLog(logEntry) {
     let logs = loadData(WORKOUT_LOGS_KEY);
@@ -229,7 +328,42 @@ document.addEventListener('DOMContentLoaded', () => {
             `
         },
         { id: 'profile', name: 'Profile', content: '<div>\n            <h2>User Profile</h2>\n            <p>This section is designated for displaying and managing user-specific information. In a full application, this could include:</p>\n            <ul>\n                <li>Username and contact details.</li>\n                <li>Profile picture and bio.</li>\n                <li>Account preferences and activity logs.</li>\n            </ul>\n            <p>For now, it\'s a placeholder to illustrate the tab\'s purpose. Data for this section would typically be fetched from the database.</p>\n            <section aria-labelledby="profile-example-heading" style="margin-top: 20px; padding: 15px; background-color: #e9e9eb; border-radius: 8px;">\n                <h3 id="profile-example-heading">Example Profile Data (Conceptual):</h3>\n                <p><strong>Name:</strong> Alex Appleby</p>\n                <p><strong>Email:</strong> alex.appleby@example.com</p>\n                <p><strong>Joined:</strong> January 1, 2024</p>\n            </section>\n        </div>' },
-        { id: 'settings', name: 'Settings', content: '<div>\n            <h2>Application Settings</h2>\n            <p>Here, you would typically find options to customize your application experience. This might include:</p>\n            <ul>\n                <li><strong>Appearance:</strong> Theme selection (light/dark mode), font size adjustments.</li>\n                <li><strong>Notifications:</strong> Preferences for email or in-app alerts.</li>\n                <li><strong>Data Management:</strong> Options to export or import data, or clear local cache.</li>\n                <li><strong>Account:</strong> Password changes, privacy settings, or account deletion.</li>\n            </ul>\n            <p>Currently, these are illustrative points. The \'Data\' tab already provides a basic example of clearing locally stored data.</p>\n            <section aria-labelledby="example-settings-heading" style="margin-top: 20px;">\n                <h3 id="example-settings-heading">Example Setting:</h3>\n                <label for="theme-select" style="margin-right: 5px;">Theme:</label>\n                <select id="theme-select" style="padding: 5px; border-radius: 4px; border: 1px solid #d2d2d7;">\n                    <option value="light">Light (Default)</option>\n                    <option value="dark" disabled>Dark (Coming Soon)</option>\n                </select>\n            </section>\n        </div>' },
+        {
+            id: 'settings',
+            name: 'Settings',
+            content: `
+            <div>
+                <h2>Application Settings</h2>
+                <p>Here, you would typically find options to customize your application experience. This might include:</p>
+                <ul>
+                    <li><strong>Appearance:</strong> Theme selection (light/dark mode), font size adjustments.</li>
+                    <li><strong>Notifications:</strong> Preferences for email or in-app alerts.</li>
+                    <li><strong>Data Management:</strong> Options to export or import data, or clear local cache.</li>
+                    <li><strong>Account:</strong> Password changes, privacy settings, or account deletion.</li>
+                </ul>
+                <section aria-labelledby="example-settings-heading" style="margin-top: 20px;">
+                    <h3 id="example-settings-heading">Example Setting:</h3>
+                    <label for="theme-select" style="margin-right: 5px;">Theme:</label>
+                    <select id="theme-select" style="padding: 5px; border-radius: 4px; border: 1px solid #d2d2d7;">
+                        <option value="light">Light (Default)</option>
+                        <option value="dark" disabled>Dark (Coming Soon)</option>
+                    </select>
+                </section>
+
+                <section id="my-equipment-section" aria-labelledby="my-equipment-heading" style="margin-top: 30px; padding-top:20px; border-top: 1px solid #eee;">
+                    <h3 id="my-equipment-heading">My Available Equipment</h3>
+                    <form id="equipment-form">
+                        <div id="equipment-checkbox-container">
+                            <!-- Checkboxes will be populated here by JavaScript -->
+                            <p>Loading equipment list...</p>
+                        </div>
+                        <button type="submit" id="save-equipment-btn" style="margin-top: 15px;">Save Equipment</button>
+                    </form>
+                    <div id="equipment-save-feedback" style="margin-top: 10px; color: green;"></div>
+                </section>
+            </div>
+            `
+        },
         { id: 'data', name: 'Data', content: '<div>\n    <h3>Manage Your Data</h3>\n    <label for="data-input" style="display:block; margin-bottom: 5px;">Enter JSON data:</label>\n    <textarea id="data-input" placeholder="Enter JSON data here (e.g., {&quot;name&quot;: &quot;John Doe&quot;, &quot;age&quot;: 30})" style="width: 100%; min-height: 100px; margin-bottom: 10px; padding: 8px; border: 1px solid #d2d2d7; border-radius: 6px;"></textarea>\n    <button id="save-data-btn" style="padding: 8px 15px; background-color: #007aff; color: white; border: none; border-radius: 6px; cursor: pointer; margin-right: 10px;">Save Data</button>\n    <button id="load-data-btn" style="padding: 8px 15px; background-color: #34c759; color: white; border: none; border-radius: 6px; cursor: pointer; margin-right: 10px;">Load Data</button>\n    <button id="clear-data-btn" style="padding: 8px 15px; background-color: #ff3b30; color: white; border: none; border-radius: 6px; cursor: pointer;">Clear Data</button>\n    <div id="data-output" aria-live="polite" style="margin-top: 20px; padding: 10px; background-color: #f0f0f0; border-radius: 6px; min-height: 50px; white-space: pre-wrap; word-wrap: break-word;">\n        <p>Data will appear here when loaded.</p>\n    </div>\n</div>' }
     ];
 
@@ -249,7 +383,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     displayExercises();
                 } else if (tabId === 'log-workout') {
                     populateExerciseDropdown();
-                    displaySavedLogs(); // Add this call
+                    displaySavedLogs();
+                } else if (tabId === 'settings') {
+                    displayEquipmentChecklist(); // Ensures checkboxes are created
+                    loadUserEquipmentAndDisplay(); // Then load and check saved ones
                 }
             }
         });
@@ -310,7 +447,10 @@ document.addEventListener('DOMContentLoaded', () => {
             displayExercises();
         } else if (initiallyActiveButton.dataset.tabId === 'log-workout') {
             populateExerciseDropdown();
-            displaySavedLogs(); // Add this call
+            displaySavedLogs();
+        } else if (initiallyActiveButton.dataset.tabId === 'settings') {
+            displayEquipmentChecklist();
+            loadUserEquipmentAndDisplay(); // Add this call
         }
     }
 
@@ -318,7 +458,21 @@ document.addEventListener('DOMContentLoaded', () => {
     const tabContentElement = document.getElementById('tab-content');
     if (tabContentElement) {
         tabContentElement.addEventListener('submit', function(event) {
-            if (event.target.id === 'log-workout-form') {
+            if (event.target.id === 'equipment-form') {
+                event.preventDefault(); // Prevent default form submission
+
+                const selectedEquipmentIds = [];
+                const settingsPanel = document.getElementById('settings-content');
+                if (settingsPanel) {
+                    const checkboxes = settingsPanel.querySelectorAll('#equipment-checkbox-container input[type="checkbox"]');
+                    checkboxes.forEach(checkbox => {
+                        if (checkbox.checked) {
+                            selectedEquipmentIds.push(checkbox.value);
+                        }
+                    });
+                }
+                saveUserEquipment(selectedEquipmentIds);
+            } else if (event.target.id === 'log-workout-form') { // Added else if
                 event.preventDefault(); // Prevent default form submission
 
                 const exerciseSelect = document.getElementById('exercise-name-select'); // ID of the select element
