@@ -233,3 +233,66 @@ header h1 {
     /* color: green; */ /* Already set by JS, but can be defined here for consistency */
     min-height: 1.2em; /* Reserve space even when empty */
 }
+
+/* Styling for Log Item Action Buttons (Edit/Delete) */
+.log-item-actions {
+    margin-top: 10px; /* Add some space above the button row */
+    display: flex; /* Align buttons in a row */
+    gap: 10px; /* Space between buttons */
+}
+
+.log-item-actions .edit-log-btn,
+.log-item-actions .delete-log-btn {
+    padding: 6px 12px;
+    font-size: 0.85em;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.log-item-actions .edit-log-btn {
+    background-color: #ffc107; /* A warning/edit yellow-orange */
+    color: #212529; /* Dark text for contrast */
+}
+
+.log-item-actions .edit-log-btn:hover {
+    background-color: #e0a800;
+    color: #000;
+}
+
+.log-item-actions .delete-log-btn {
+    background-color: #dc3545; /* A danger/delete red */
+    color: white;
+}
+
+.log-item-actions .delete-log-btn:hover {
+    background-color: #c82333;
+}
+
+/* Styling for the Cancel Edit button */
+#log-workout-form button#cancel-edit-btn {
+    background-color: #6c757d; /* A secondary/gray color */
+    color: white;
+    padding: 12px 20px; /* Match save/update button padding if desired, or keep distinct */
+    border: none;
+    border-radius: 6px;
+    font-size: 1em; /* Match save/update button font size */
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+#log-workout-form button#cancel-edit-btn:hover {
+    background-color: #5a6268;
+}
+
+/* Optional: Visual cue for when the form is in edit mode */
+/* For example, a border on the form or a message. */
+/* This requires JS to add/remove a class to the form when in edit mode. */
+/* For now, the button text change ('Update Log') is the main cue. */
+/* Example if we added an 'edit-mode' class to the form:
+#log-workout-form.edit-mode {
+    border: 2px dashed #ffc107;
+    padding: 15px; // Adjust padding if border is added
+}
+*/

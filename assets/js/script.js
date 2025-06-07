@@ -174,6 +174,49 @@ function populateExerciseDropdown() {
     });
 }
 
+function populateEditForm(logTimestamp) {
+    const logs = loadData(WORKOUT_LOGS_KEY);
+    if (!logs) return;
+
+    const logToEdit = logs.find(log => log.timestamp === logTimestamp);
+    if (!logToEdit) {
+        alert('Error: Could not find log entry to edit.');
+        return;
+    }
+
+    // Ensure the form elements are accessible (assuming 'log-workout' tab is active or elements are global)
+    const logWorkoutPanel = document.getElementById('log-workout-content');
+    if (!logWorkoutPanel) return;
+
+    // Populate the form fields
+    // Important: Ensure populateExerciseDropdown has run if the select is empty
+    // This should be handled by switchTab calling populateExerciseDropdown first.
+    logWorkoutPanel.querySelector('#exercise-name-select').value = logToEdit.exerciseId;
+    logWorkoutPanel.querySelector('#exercise-sets').value = logToEdit.sets;
+    logWorkoutPanel.querySelector('#exercise-reps').value = logToEdit.reps;
+    logWorkoutPanel.querySelector('#exercise-weight').value = logToEdit.weight;
+    logWorkoutPanel.querySelector('#editing-log-timestamp').value = logToEdit.timestamp;
+
+    // Change button text and visibility
+    logWorkoutPanel.querySelector('#save-log-btn').textContent = 'Update Log';
+    logWorkoutPanel.querySelector('#cancel-edit-btn').style.display = 'inline-block';
+
+    // Optional: Scroll form into view
+    logWorkoutPanel.querySelector('#log-workout-form').scrollIntoView({ behavior: 'smooth' });
+}
+
+function resetLogForm() {
+    const logWorkoutPanel = document.getElementById('log-workout-content');
+    if (!logWorkoutPanel) return;
+
+    logWorkoutPanel.querySelector('#log-workout-form').reset(); // Clears form fields
+    logWorkoutPanel.querySelector('#editing-log-timestamp').value = ''; // Clear editing timestamp
+    logWorkoutPanel.querySelector('#save-log-btn').textContent = 'Save Log';
+    logWorkoutPanel.querySelector('#cancel-edit-btn').style.display = 'none';
+    // Ensure dropdown is reset to default selection
+    logWorkoutPanel.querySelector('#exercise-name-select').value = "";
+}
+
 const USER_EQUIPMENT_KEY = 'userEquipment';
 const WORKOUT_LOGS_KEY = 'workoutLogs'; // Define a constant for the localStorage key
 
@@ -235,6 +278,28 @@ function saveWorkoutLog(logEntry) {
     // displaySavedLogs(); // We'll call this separately after saving for now
 }
 
+function deleteWorkoutLog(logTimestamp) {
+    let logs = loadData(WORKOUT_LOGS_KEY);
+    if (!logs || !Array.isArray(logs)) {
+        console.log('No logs to delete or logs data is corrupted.');
+        return;
+    }
+
+    const initialLogCount = logs.length;
+    logs = logs.filter(log => log.timestamp !== logTimestamp);
+
+    if (logs.length < initialLogCount) {
+        saveData(WORKOUT_LOGS_KEY, logs);
+        console.log('Workout log deleted:', logTimestamp);
+        alert('Log entry deleted.'); // User feedback
+    } else {
+        console.log('Log entry not found for deletion:', logTimestamp);
+        alert('Could not find the log entry to delete.');
+    }
+
+    displaySavedLogs(); // Refresh the list
+}
+
 function displaySavedLogs() {
     const logWorkoutPanel = document.getElementById('log-workout-content');
     if (!logWorkoutPanel) {
@@ -260,19 +325,43 @@ function displaySavedLogs() {
     logs.slice().reverse().forEach(log => {
         const listItem = document.createElement('li');
         const logDate = new Date(log.timestamp);
-        // Format date and time to be more readable
         const formattedTimestamp = `${logDate.toLocaleDateString()} ${logDate.toLocaleTimeString()}`;
 
-        listItem.innerHTML = `
+        // Main log content
+        const logDetails = document.createElement('div');
+        logDetails.innerHTML = `
             <strong>${log.exerciseName}</strong> - ${formattedTimestamp}<br>
             Sets: ${log.sets}, Reps: ${log.reps}, Weight: ${log.weight}
         `;
-        // Add some basic styling or class for styling via CSS later
+        logDetails.style.marginBottom = '10px'; // Space before buttons
+
+        // Buttons container
+        const buttonsDiv = document.createElement('div');
+        buttonsDiv.classList.add('log-item-actions'); // For styling the container
+
+        // Edit Button
+        const editButton = document.createElement('button');
+        editButton.textContent = 'Edit';
+        editButton.classList.add('edit-log-btn'); // Class for styling
+        editButton.dataset.timestamp = log.timestamp;
+        editButton.style.marginRight = '8px'; // Space between buttons
+
+        // Delete Button
+        const deleteButton = document.createElement('button');
+        deleteButton.textContent = 'Delete';
+        deleteButton.classList.add('delete-log-btn'); // Class for styling
+        deleteButton.dataset.timestamp = log.timestamp;
+
+        buttonsDiv.appendChild(editButton);
+        buttonsDiv.appendChild(deleteButton);
+
+        listItem.appendChild(logDetails);
+        listItem.appendChild(buttonsDiv);
+
+        // Styling for listItem (already present from previous steps)
         listItem.style.padding = '10px';
         listItem.style.borderBottom = '1px solid #eee';
-        if (logsListElement.firstChild) { // Add a small top border if not the first
-             // listItem.style.borderTop = '1px solid #eee';
-        }
+
         logsListElement.appendChild(listItem);
     });
 }
@@ -298,6 +387,7 @@ document.addEventListener('DOMContentLoaded', () => {
             content: `
                 <h2>Log Your Workout</h2>
                 <form id="log-workout-form">
+                    <input type="hidden" id="editing-log-timestamp" name="editing-log-timestamp">
                     <div class="form-group">
                         <label for="exercise-name-select">Exercise Name:</label>
                         <select id="exercise-name-select" name="exercise-name-select" required>
@@ -318,6 +408,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <input type="number" id="exercise-weight" name="exercise-weight" min="0" step="0.1">
                     </div>
                     <button type="submit" id="save-log-btn">Save Log</button>
+                    <button type="button" id="cancel-edit-btn" style="display:none; margin-left: 10px;">Cancel Edit</button>
                 </form>
                 <div id="saved-logs-container" style="margin-top: 30px;">
                     <h3>Previously Saved Logs:</h3>
@@ -457,10 +548,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // Using Event Delegation for the Log Workout form submission:
     const tabContentElement = document.getElementById('tab-content');
     if (tabContentElement) {
+        // Handle form submissions
         tabContentElement.addEventListener('submit', function(event) {
             if (event.target.id === 'equipment-form') {
                 event.preventDefault(); // Prevent default form submission
-
+                // ... (equipment form logic from previous step, ensure it's correct) ...
                 const selectedEquipmentIds = [];
                 const settingsPanel = document.getElementById('settings-content');
                 if (settingsPanel) {
@@ -472,42 +564,113 @@ document.addEventListener('DOMContentLoaded', () => {
                     });
                 }
                 saveUserEquipment(selectedEquipmentIds);
-            } else if (event.target.id === 'log-workout-form') { // Added else if
+            } else if (event.target.id === 'log-workout-form') {
                 event.preventDefault(); // Prevent default form submission
 
-                const exerciseSelect = document.getElementById('exercise-name-select'); // ID of the select element
+                const editingTimestampInput = document.getElementById('editing-log-timestamp');
+                const currentEditingTimestamp = editingTimestampInput ? editingTimestampInput.value : null;
+
+                const exerciseSelect = document.getElementById('exercise-name-select');
                 const setsInput = document.getElementById('exercise-sets');
                 const repsInput = document.getElementById('exercise-reps');
                 const weightInput = document.getElementById('exercise-weight');
 
-                const logEntry = {
-                    exerciseId: exerciseSelect.value, // Store the ID
-                    exerciseName: exerciseSelect.options[exerciseSelect.selectedIndex].text, // Store name for easier display
+                const updatedLogData = {
+                    exerciseId: exerciseSelect.value,
+                    exerciseName: exerciseSelect.options[exerciseSelect.selectedIndex].text,
                     sets: parseInt(setsInput.value),
                     reps: parseInt(repsInput.value),
-                    weight: parseFloat(weightInput.value) || 0, // Default to 0 if empty
-                    timestamp: new Date().toISOString()
+                    weight: parseFloat(weightInput.value) || 0,
+                    // timestamp will be handled based on whether it's an edit or new
                 };
 
-                if (!logEntry.exerciseId) {
+                if (!updatedLogData.exerciseId) {
                     alert('Please select an exercise.');
                     return;
                 }
 
-                saveWorkoutLog(logEntry);
+                if (currentEditingTimestamp) {
+                    // ---- EDIT MODE ----
+                    let logs = loadData(WORKOUT_LOGS_KEY);
+                    if (!logs || !Array.isArray(logs)) {
+                        alert('Error: Could not load logs to update.');
+                        return;
+                    }
 
-                // Alert user or give feedback
-                alert('Workout log saved!'); // Simple feedback
-                displaySavedLogs(); // Add this call to refresh the list
-                event.target.reset(); // Resets the form
-                // Repopulate dropdown's default selection (if needed, but reset might handle it)
-                // exerciseSelect.value = "";
+                    const logIndex = logs.findIndex(log => log.timestamp === currentEditingTimestamp);
+
+                    if (logIndex === -1) {
+                        alert('Error: Could not find the log entry to update.');
+                        return;
+                    }
+
+                    // Update the existing log entry, preserving its original timestamp as ID
+                    logs[logIndex] = {
+                        ...logs[logIndex], // Keep original timestamp and any other non-edited fields
+                        ...updatedLogData, // Apply new data
+                        timestamp: currentEditingTimestamp // Explicitly ensure original timestamp is kept
+                    };
+
+                    saveData(WORKOUT_LOGS_KEY, logs);
+                    alert('Workout log updated successfully!');
+                    resetLogForm(); // Reset form to save mode and clear fields
+                    displaySavedLogs(); // Refresh the list
+
+                } else {
+                    // ---- SAVE NEW LOG MODE ----
+                    const newLogEntry = {
+                        ...updatedLogData,
+                        timestamp: new Date().toISOString() // Generate new timestamp for new log
+                    };
+                    saveWorkoutLog(newLogEntry); // saveWorkoutLog only saves
+
+                    alert('Workout log saved!');
+                    resetLogForm(); // Reset form
+                    displaySavedLogs(); // Refresh list
+                }
             }
         });
+
+        // Handle clicks on dynamically added buttons within saved logs list
+        const logWorkoutPanelForClicks = document.getElementById('log-workout-content');
+        if (logWorkoutPanelForClicks) {
+            const savedLogsListElement = logWorkoutPanelForClicks.querySelector('#saved-logs-list');
+            if (savedLogsListElement) {
+                savedLogsListElement.addEventListener('click', function(event) {
+                    if (event.target.classList.contains('delete-log-btn')) {
+                        const logTimestamp = event.target.dataset.timestamp;
+                        if (logTimestamp) {
+                            if (confirm('Are you sure you want to delete this log entry?')) {
+                                deleteWorkoutLog(logTimestamp);
+                            }
+                        } else {
+                            console.error('Delete button clicked without a timestamp.');
+                        }
+                    } else if (event.target.classList.contains('edit-log-btn')) { // Add this
+                        const logTimestamp = event.target.dataset.timestamp;
+                        if (logTimestamp) {
+                            populateEditForm(logTimestamp);
+                        } else {
+                            console.error('Edit button clicked without a timestamp.');
+                        }
+                    }
+                });
+            }
+        }
+
+        // Event listener for Cancel Edit button (using delegation on the form)
+        const formInPanel = logWorkoutPanelForClicks?.querySelector('#log-workout-form'); // Re-use panel variable if available or get form directly
+        if(formInPanel){
+            formInPanel.addEventListener('click', function(event){
+                if(event.target.id === 'cancel-edit-btn'){
+                    resetLogForm();
+                }
+            });
+        }
     }
 
     // Event listeners for the Data tab
-    const dataTabContent = document.getElementById('data-content'); // Corrected to use tabContentElement
+    const dataTabContent = document.getElementById('data-content');
     if (dataTabContent) { // Check if the data tab content exists
         const dataInput = dataTabContent.querySelector('#data-input');
         const saveDataBtn = dataTabContent.querySelector('#save-data-btn');
