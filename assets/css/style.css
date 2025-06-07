@@ -82,3 +82,31 @@ header h1 {
 #tab-content > div.active {
     display: block; /* Show active tab panel */
 }
+
+/* Styling for the Exercises Tab */
+#exercise-list-container ul {
+    list-style-type: none; /* Already set by JS, but good to have in CSS */
+    padding: 0; /* Already set by JS, but good to have in CSS */
+}
+
+#exercise-list-container li {
+    background-color: #f9f9f9; /* Light background for each exercise item */
+    border: 1px solid #e0e0e0; /* Slightly refined border color */
+    /* margin-bottom, padding, border-radius are set by JS, can be moved here later if desired */
+}
+
+#exercise-list-container li h3 {
+    /* color is set by JS, can be moved here */
+    font-size: 1.4em; /* Slightly larger heading for exercise names */
+    font-weight: 600;
+}
+
+#exercise-list-container li p {
+    margin-bottom: 8px; /* Space between paragraphs within an exercise item */
+    line-height: 1.5; /* Improve readability of instructions */
+    color: #333; /* Darker text for better contrast on light background */
+}
+
+#exercise-list-container li p strong {
+    color: #1d1d1f; /* Standard text color for strong elements */
+}
